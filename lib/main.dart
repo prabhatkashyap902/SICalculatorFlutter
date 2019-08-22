@@ -97,7 +97,7 @@ class _SIFormState extends State<_SIForm> {
                       controller: term,
                       style: textStyle,
                       validator: (String value){
-                        if(value.){
+                        if(value.isEmpty){
                           return "Please enter some number";
                         }
                       },
