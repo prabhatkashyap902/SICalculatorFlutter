@@ -20,13 +20,16 @@ class _SIForm extends StatefulWidget {
 }
 
 class _SIFormState extends State<_SIForm> {
+
+  var _formkey=GlobalKey<FormState>();
+
   var _currencies = ["Rupees", "Pounds", "Dollars", "Others"];
   var _currentCurrencies = "Rupees";
   String total = "";
 
-  TextEditingController principle =TextEditingController();
+  TextEditingController principle = TextEditingController();
   TextEditingController roi = TextEditingController();
-  TextEditingController term =TextEditingController();
+  TextEditingController term = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,21 +40,29 @@ class _SIFormState extends State<_SIForm> {
       appBar: AppBar(
         title: Text("SI Calculator"),
       ),
-      body: Container(
-        margin: EdgeInsets.only(top: 20, left: 2, right: 2),
+      body: Form(
+        key: _formkey,
+          child: Padding(
+        padding: EdgeInsets.only(top: 20, left: 2, right: 2),
         child: ListView(
           children: <Widget>[
             getImageAsset(),
             Padding(
               padding: EdgeInsets.all(10),
-              child: TextField(
+              child: TextFormField(
                 keyboardType: TextInputType.number,
                 style: textStyle,
                 controller: principle,
+                validator: (String value){
+                  if(value.isEmpty){
+                    return "Please enter some number";
+                  }
+                },
                 decoration: InputDecoration(
                   hintText: "write number eg. 12000",
                   labelText: "Principal",
                   labelStyle: textStyle,
+                  errorStyle: TextStyle(color: Colors.amber),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
@@ -59,14 +70,20 @@ class _SIFormState extends State<_SIForm> {
             ),
             Padding(
               padding: EdgeInsets.all(10),
-              child: TextField(
+              child: TextFormField(
                 style: textStyle,
                 controller: roi,
                 keyboardType: TextInputType.number,
+                validator: (String value){
+                  if(value.isEmpty){
+                    return "Please enter some number";
+                  }
+                },
                 decoration: InputDecoration(
                     labelText: "Rate of Interest",
                     hintText: "Write any number eg. 12000",
                     labelStyle: textStyle,
+                    errorStyle: TextStyle(color: Colors.amber),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10))),
               ),
@@ -76,13 +93,19 @@ class _SIFormState extends State<_SIForm> {
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
+                    child: TextFormField(
                       controller: term,
                       style: textStyle,
+                      validator: (String value){
+                        if(value.){
+                          return "Please enter some number";
+                        }
+                      },
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: "Term",
                         labelStyle: textStyle,
+                        errorStyle: TextStyle(color: Colors.amber),
                         hintText: "Number of years",
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10)),
@@ -101,7 +124,6 @@ class _SIFormState extends State<_SIForm> {
                           );
                         }).toList(),
                         value: _currentCurrencies,
-
                         onChanged: (String values) {
                           _onDropItemSelected(values);
                         }),
@@ -118,10 +140,16 @@ class _SIFormState extends State<_SIForm> {
                       elevation: 10,
                       textColor: Colors.white,
                       color: Colors.pink,
-                      child: Text("Calculate",textScaleFactor: 1.2,),
+                      child: Text(
+                        "Calculate",
+                        textScaleFactor: 1.2,
+                      ),
                       onPressed: () {
                         setState(() {
-                          total=_calculate();
+                          if(_formkey.currentState.validate()){
+                            total = _calculate();
+                          }
+
                         });
                       },
                     ),
@@ -134,7 +162,10 @@ class _SIFormState extends State<_SIForm> {
                       elevation: 10,
                       textColor: Colors.white,
                       color: Colors.amber,
-                      child: Text("Reset",textScaleFactor: 1.2,),
+                      child: Text(
+                        "Reset",
+                        textScaleFactor: 1.2,
+                      ),
                       onPressed: () {
                         setState(() {
                           reset();
@@ -147,11 +178,14 @@ class _SIFormState extends State<_SIForm> {
             ),
             Padding(
               padding: EdgeInsets.only(top: 20, left: 20),
-              child: Text(total,style: textStyle,),
+              child: Text(
+                total,
+                style: textStyle,
+              ),
             )
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -167,26 +201,28 @@ class _SIFormState extends State<_SIForm> {
     );
   }
 
-  void _onDropItemSelected(String values){
+  void _onDropItemSelected(String values) {
     setState(() {
-      this._currentCurrencies =values;
+      this._currentCurrencies = values;
     });
   }
-  String _calculate(){
+
+  String _calculate() {
     double principles = double.parse(principle.text);
-    double rois =double.parse(roi.text);
-    double terms =double.parse(term.text);
-    double total =principles +(principles*rois*terms)/100;
-    principle.text='';
-    roi.text='';
-    term.text='';
+    double rois = double.parse(roi.text);
+    double terms = double.parse(term.text);
+    double total = principles + (principles * rois * terms) / 100;
+    principle.text = '';
+    roi.text = '';
+    term.text = '';
     return "The Amount will be $total $_currentCurrencies in $terms Years with the interest of $rois and principle is $principles!";
   }
-  void reset(){
-    principle.text='';
-    roi.text='';
-    term.text='';
-    total='';
-    _currentCurrencies=_currencies[0];
+
+  void reset() {
+    principle.text = '';
+    roi.text = '';
+    term.text = '';
+    total = '';
+    _currentCurrencies = _currencies[0];
   }
 }
